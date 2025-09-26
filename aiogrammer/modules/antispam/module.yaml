@@ -1,0 +1,3 @@
+name: antispam
+version: 0.1.0
+summary: Simple anti-spam middleware limiting messages per time window and warning users
