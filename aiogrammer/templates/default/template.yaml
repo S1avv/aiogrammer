@@ -1,0 +1,5 @@
+name: default
+version: 0.1.0
+summary: Basic professionally designed bot template on Aiogram 3
+category: default
+entrypoint: src.main:main
