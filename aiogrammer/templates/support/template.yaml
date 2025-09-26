@@ -1,0 +1,5 @@
+name: support
+version: 0.1.0
+summary: Simple support/helpdesk bot with ticket capture via FSM and forwarding to a support chat
+category: support
+entrypoint: src.main:main
