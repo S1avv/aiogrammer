@@ -3,6 +3,8 @@ from typing import Optional
 from rich.console import Console
 from rich.prompt import Prompt
 from pathlib import Path
+import shutil
+import yaml
 
 from .ui import brand_panel, templates_table, modules_table
 from .templates import discover_templates, discover_modules
@@ -12,7 +14,7 @@ app = typer.Typer(help="aiogrammer — Aiogram Template Generator")
 console = Console()
 
 
-@app.command("list-templates")
+@app.command("list-templates", help="List available templates")
 def list_templates():
     templates = discover_templates()
     console.print(brand_panel())
@@ -22,7 +24,7 @@ def list_templates():
     console.print(templates_table(templates))
 
 
-@app.command("add-template")
+@app.command("add-template", help="Create a new project from a template")
 def add_template(
     name: Optional[str] = typer.Option(None, "--name", "-n", help="Project folder name (defaults to template name)"),
     template: Optional[str] = typer.Option(None, "--template", "-t", help="Template name"),
@@ -49,7 +51,7 @@ def add_template(
     console.print(f"[green]Project initialized at:[/green] {target}")
 
 
-@app.command("add-module")
+@app.command("add-module", help="Add a ready-to-use module into a project")
 def add_module(
     module: Optional[str] = typer.Option(None, "--module", "-m", help="Module name to add"),
     project_dir: Path = typer.Option(Path.cwd(), "--project", "-p", help="Project root to add a module to"),
@@ -80,7 +82,85 @@ def add_module(
         raise typer.Exit(1)
 
 
-@app.command("list-modules")
+# New commands: create custom template/module from a source folder into local repo
+@app.command("new-template", help="Register a custom template from a local folder")
+def new_template(
+    source: Path = typer.Option(..., "--source", "-s", help="Path to the source template folder"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Template name (defaults to source folder name)"),
+    force: bool = typer.Option(False, "--force", help="Overwrite if target already exists"),
+):
+    if not source.exists() or not source.is_dir():
+        console.print(f"[red]Source folder not found or not a directory:[/red] {source}")
+        raise typer.Exit(1)
+
+    repo_root = Path(__file__).resolve().parents[1]
+    templates_root = repo_root / "templates"
+    templates_root.mkdir(parents=True, exist_ok=True)
+
+    template_name = name or source.name
+    dest = templates_root / template_name
+
+    if dest.exists():
+        if not force:
+            console.print(f"[red]Template '{template_name}' already exists at {dest}. Use --force to overwrite.[/red]")
+            raise typer.Exit(1)
+        shutil.rmtree(dest)
+
+    shutil.copytree(source, dest)
+
+    version = Prompt.ask("Version", default="0.1.0")
+    summary = Prompt.ask("Summary", default=f"Custom template: {template_name}")
+
+    manifest = {
+        "name": template_name,
+        "version": version,
+        "summary": summary,
+        "category": "custom",
+    }
+    (dest / "template.yaml").write_text(yaml.safe_dump(manifest, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+    console.print(f"[green]Custom template created at:[/green] {dest}")
+
+
+@app.command("new-module", help="Register a custom module from a local folder")
+def new_module(
+    source: Path = typer.Option(..., "--source", "-s", help="Path to the source module folder"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Module name (defaults to source folder name)"),
+    force: bool = typer.Option(False, "--force", help="Overwrite if target already exists"),
+):
+    if not source.exists() or not source.is_dir():
+        console.print(f"[red]Source folder not found or not a directory:[/red] {source}")
+        raise typer.Exit(1)
+
+    pkg_root = Path(__file__).resolve().parent
+    modules_root = pkg_root / "modules"
+    modules_root.mkdir(parents=True, exist_ok=True)
+
+    module_name = name or source.name
+    dest = modules_root / module_name
+
+    if dest.exists():
+        if not force:
+            console.print(f"[red]Module '{module_name}' already exists at {dest}. Use --force to overwrite.[/red]")
+            raise typer.Exit(1)
+        shutil.rmtree(dest)
+
+    shutil.copytree(source, dest)
+
+    version = Prompt.ask("Version", default="0.1.0")
+    summary = Prompt.ask("Summary", default=f"Custom module: {module_name}")
+
+    manifest = {
+        "name": module_name,
+        "version": version,
+        "summary": summary,
+    }
+    (dest / "module.yaml").write_text(yaml.safe_dump(manifest, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+    console.print(f"[green]Custom module created at:[/green] {dest}")
+
+
+@app.command("list-modules", help="List available modules")
 def list_modules():
     modules = discover_modules()
     console.print(brand_panel())
