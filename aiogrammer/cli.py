@@ -82,7 +82,6 @@ def add_module(
         raise typer.Exit(1)
 
 
-# New commands: create custom template/module from a source folder into local repo
 @app.command("new-template", help="Register a custom template from a local folder")
 def new_template(
     source: Path = typer.Option(..., "--source", "-s", help="Path to the source template folder"),
