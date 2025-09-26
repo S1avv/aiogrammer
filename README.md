@@ -1,5 +1,7 @@
 # Aiogrammer
 
+![Demo](data/demo.gif)
+
 Aiogrammer is a powerful template-based generator for building Telegram bots with aiogram. This MVP provides a clean, professional, and simple file structure to kickstart development without any source code yet.
 
 ## Goals
