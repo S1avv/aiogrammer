@@ -1,0 +1,5 @@
+name: quiz
+version: 0.1.0
+summary: Quiz/Trivia bot template with async SQLAlchemy ORM and local SQLite database
+category: quiz
+entrypoint: src.main:main
