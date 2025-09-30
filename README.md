@@ -14,6 +14,7 @@ A powerful template-based generator for building Telegram bots with aiogram
 - support — Simple helpdesk bot with ticket capture and forwarding to a support chat → [jump to details](#templates-reference)
 - quiz — Quiz/Trivia bot with async SQLAlchemy ORM and local SQLite database → [jump to details](#templates-reference)
 - minimal — Minimal Aiogram 3 starter without extra boilerplate → [jump to details](#templates-reference)
+- multibot — Run multiple bots from one application → [jump to details](#templates-reference)
 
 ## Modules 🧩
 - admin — Admin panel with access control and a basic inline menu. See details in the Modules Reference below → [jump to details](#modules-reference)
@@ -21,6 +22,8 @@ A powerful template-based generator for building Telegram bots with aiogram
 - pagination — Inline pagination helpers and demo with navigation extras → [jump to details](#modules-reference)
 - i18n — Simple localization middleware with JSON locales and fallback → [jump to details](#modules-reference)
 - security — Helpers for secrets validation and log redaction → [jump to details](#modules-reference)
+- roles — Granular roles/permissions with simple RBAC helpers → [jump to details](#modules-reference)
+- broadcast — Helpers for mass messaging to users with batching and error handling → [jump to details](#modules-reference)
 
 ## Usage 🧭
 - List templates:
@@ -118,6 +121,17 @@ After installation, verify: ✅
   - .env.example — env variables example
   - README.md — template docs
 
+#### multibot
+- Summary: Run multiple bots from one application (shared handlers)
+- Entrypoint: src.main:main
+- Env:
+  - BOT_TOKENS — comma-separated list of bot tokens (or `BOT_TOKEN` for a single bot)
+- Includes:
+  - src/main.py — spins up multiple bots concurrently and registers shared handlers
+  - requirements.txt — dependencies
+  - .env.example — env variables example
+  - README.md — template docs
+
 ### Modules Reference 🧩
 #### admin
 - Summary: Admin module with access control and basic menu
@@ -172,6 +186,30 @@ After installation, verify: ✅
 - Files:
   - utils.py — masking, filter, env validation
   - __init__.py — exports mask_text, RedactFilter, validate_env
+  - module.yaml — manifest
+
+#### roles
+- Summary: Granular roles/permissions with simple RBAC helpers
+- Provides:
+  - RolesRegistry with role permissions and wildcard "*"
+  - RBACMiddleware injecting `rbac` into handler `data`
+  - Permissions constants and `require_permissions` decorator
+- Files:
+  - permissions.py — core RBAC registry and helpers
+  - middleware.py — RBAC middleware
+  - __init__.py — exports RolesRegistry, RBACMiddleware, Permissions, require_permissions
+  - module.yaml — manifest
+
+#### broadcast
+- Summary: Helpers for mass messaging to users with batching and error handling
+- Provides:
+  - `broadcast_text` for batched sending with delay/silent options
+  - `Broadcaster` class wrapping sending logic
+  - RabbitMQ helpers `publish_text_messages` and `run_worker` (optional)
+- Files:
+  - utils.py — batching and error handling helpers
+  - rabbitmq.py — RabbitMQ enqueue and worker helpers (aio-pika)
+  - __init__.py — exports helpers
   - module.yaml — manifest
 
 ## Custom local templates and modules 🧑‍💻
