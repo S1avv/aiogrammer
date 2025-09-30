@@ -5,6 +5,12 @@ from rich.prompt import Prompt
 from pathlib import Path
 import shutil
 import yaml
+import sys
+import platform
+from importlib import metadata
+import sys
+import platform
+from importlib import metadata
 
 from .ui import brand_panel, templates_table, modules_table
 from .templates import discover_templates, discover_modules
@@ -167,6 +173,75 @@ def list_modules():
         console.print("[yellow]No modules found.[/yellow]")
         raise typer.Exit(code=0)
     console.print(modules_table(modules))
+
+
+@app.command("doctor", help="Self-diagnostic: environment, versions, and paths")
+def doctor():
+    console.print(brand_panel())
+
+    py_ver = platform.python_version()
+    os_info = f"{platform.system()} {platform.release()} ({platform.version()})"
+    exe = sys.executable or "?"
+
+    def pkg_ver(name: str) -> str:
+        try:
+            return metadata.version(name)
+        except Exception:
+            return "not installed"
+
+    aiogrammer_ver = pkg_ver("aiogrammer")
+    typer_ver = pkg_ver("typer")
+    rich_ver = pkg_ver("rich")
+    yaml_ver = pkg_ver("PyYAML")
+
+    templates = discover_templates()
+    modules = discover_modules()
+    t_root = None
+    m_root = None
+    if templates:
+        try:
+            t_root = Path(templates[0]["path"]).resolve().parent
+        except Exception:
+            t_root = None
+    if modules:
+        try:
+            m_root = Path(modules[0]["path"]).resolve().parent
+        except Exception:
+            m_root = None
+
+    console.print("[bold]Environment[/bold]")
+    console.print(f"- Python: [green]{py_ver}[/green]")
+    console.print(f"- OS: [cyan]{os_info}[/cyan]")
+    console.print(f"- Executable: [magenta]{exe}[/magenta]")
+
+    console.print("\n[bold]Packages[/bold]")
+    console.print(f"- aiogrammer: [yellow]{aiogrammer_ver}[/yellow]")
+    console.print(f"- typer: [yellow]{typer_ver}[/yellow]")
+    console.print(f"- rich: [yellow]{rich_ver}[/yellow]")
+    console.print(f"- PyYAML: [yellow]{yaml_ver}[/yellow]")
+
+    console.print("\n[bold]Templates[/bold]")
+    if templates:
+        console.print(f"- Root: [green]{t_root}[/green]")
+        console.print(f"- Count: [green]{len(templates)}[/green]")
+        preview = ", ".join(t.get("name", "?") for t in templates[:5])
+        console.print(f"- Examples: {preview}{'…' if len(templates) > 5 else ''}")
+    else:
+        console.print("- [yellow]No templates found[/yellow]")
+
+    console.print("\n[bold]Modules[/bold]")
+    if modules:
+        console.print(f"- Root: [green]{m_root}[/green]")
+        console.print(f"- Count: [green]{len(modules)}[/green]")
+        preview = ", ".join(m.get("name", "?") for m in modules[:5])
+        console.print(f"- Examples: {preview}{'…' if len(modules) > 5 else ''}")
+    else:
+        console.print("- [yellow]No modules found[/yellow]")
+
+    console.print("\n[bold]Hints[/bold]")
+    console.print("- Set AIOGRAMMER_TEMPLATES_DIR to use custom templates root")
+    console.print("- Set AIOGRAMMER_MODULES_DIR to use custom modules root")
+    console.print("- Use 'aiogrammer list-templates' and 'aiogrammer list-modules' to verify discovery")
 
 
 if __name__ == "__main__":
