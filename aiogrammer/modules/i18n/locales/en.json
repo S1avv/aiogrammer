@@ -1,0 +1,4 @@
+{
+  "start.hello": "Hello!",
+  "start.welcome": "Welcome, {name}!"
+}

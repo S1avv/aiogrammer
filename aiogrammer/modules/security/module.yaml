@@ -1,0 +1,3 @@
+name: security
+version: 0.1.0
+summary: Helpers for secrets validation and log redaction to improve safety
