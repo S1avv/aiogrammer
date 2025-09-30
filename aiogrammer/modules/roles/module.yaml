@@ -1,0 +1,3 @@
+name: roles
+version: 0.1.0
+summary: Granular roles/permissions with simple RBAC helpers

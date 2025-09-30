@@ -1,0 +1,5 @@
+name: multibot
+version: 0.1.0
+summary: Run multiple bots from one application
+category: multibot
+entrypoint: src.main:main
