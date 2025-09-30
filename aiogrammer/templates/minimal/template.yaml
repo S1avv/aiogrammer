@@ -1,0 +1,5 @@
+name: minimal
+version: 0.1.0
+summary: Minimal Aiogram 3 starter without extra boilerplate
+category: minimal
+entrypoint: src.main:main
